@@ -6,7 +6,7 @@
 schema_version = 1
 id = "am"
 name = "AppMan"
-version = "10.3.3"
+version = "10.3.4"
 description = "AppImages and portable programs from AM's database"
 
 # AM colours its output when a terminal is watching.
@@ -61,7 +61,11 @@ fields = { name = "name", version = "version", pkg_type = "pkg_type", size = "si
 
 # AM has no machine-readable progress, so these report the stage they are at
 # and nothing finer.
+# Some AM scripts stop to ask which build to install. Without a terminal the
+# question is never even printed and the script fails on the empty answer, so
+# these run on one and the question is put to whoever asked for the install.
 [ops.install]
+needs_terminal = true
 args = ["-i", "{selector}"]
 output = { format = "lines" }
 
