@@ -7,7 +7,7 @@
 schema_version = 1
 id = "pacstall"
 name = "Pacstall"
-version = "6.4.3"
+version = "6.4.4"
 description = "An AUR inspired package manager for Ubuntu"
 
 # Pacstall colours its output and marks repository names as clickable links.
@@ -33,6 +33,7 @@ min_version = "6.4"
 # carries a description at all.
 [ops.search]
 args = ["-Sd", "{query}"]
+elevate = false
 output = { format = "lines" }
 pattern = "^(?P<name>\\S+)\\s+-\\s+(?P<description>.*?)\\s+@\\s+(?P<repo>\\S+)\\s*$"
 fields = { name = "name", description = "description", repo = "repo" }
@@ -45,6 +46,7 @@ fields = { name = "name", description = "description", repo = "repo" }
 # reading of it.
 [ops.list_installed]
 args = ["-L"]
+elevate = false
 output = { format = "lines" }
 pattern = "^(?P<name>\\S+)\\s*$"
 fields = { name = "name" }
@@ -54,6 +56,7 @@ fields = { name = "name" }
 # carries one.
 [ops.info]
 args = ["-Si", "{selector}"]
+elevate = false
 output = { format = "keyvalue", separator = "=" }
 fields = { name = "pkgbase", version = "pkgver", description = "pkgdesc", repo = "gives" }
 
@@ -108,6 +111,27 @@ elevate = false
 output = { format = "lines" }
 pattern = "^\\s*(?P<name>\\S+)\\s+@\\s+(?P<repo>\\S+)\\s+\\(\\s*(?P<version>\\S+)\\s+->\\s+(?P<new_version>\\S+)\\s*\\)\\s*$"
 fields = { name = "name", version = "version", new_version = "new_version", repo = "repo" }
+
+# The installed listing is only names, so everything else is asked for one
+# package at a time. This reads what pacstall recorded locally, which is quick
+# and needs no privilege.
+[ops.info_installed]
+args = ["-Ci", "{selector}"]
+elevate = false
+output = { format = "keyvalue" }
+fields = { name = "name", version = "version", description = "description", size = "size", installed_at = "date installed" }
+
+[[ops.info_installed.extra]]
+label = "Maintainer"
+field = "maintainer"
+
+[[ops.info_installed.extra]]
+label = "Dependencies"
+field = "dependencies"
+
+[[ops.info_installed.extra]]
+label = "Install type"
+field = "install type"
 
 [ops.update]
 args = ["-P", "-Up"]
