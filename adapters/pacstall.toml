@@ -57,6 +57,36 @@ args = ["-Si", "{selector}"]
 output = { format = "keyvalue", separator = "=" }
 fields = { name = "pkgbase", version = "pkgver", description = "pkgdesc", repo = "gives" }
 
+# Everything else pacstall reports about a package. Aeris shows these as
+# given, so the labels are what a reader sees.
+[[ops.info.extra]]
+label = "Maintainer"
+field = "maintainer"
+
+[[ops.info.extra]]
+label = "Installs as"
+field = "gives"
+
+[[ops.info.extra]]
+label = "Architecture"
+field = "arch"
+
+[[ops.info.extra]]
+label = "Depends"
+field = "depends"
+
+[[ops.info.extra]]
+label = "Optional"
+field = "optdepends"
+
+[[ops.info.extra]]
+label = "Replaces"
+field = "replaces"
+
+[[ops.info.extra]]
+label = "Source"
+field = "source"
+
 # `-P` answers the prompts, which is the only way this runs unattended.
 # Elevation comes from the [system] table above rather than from here.
 [ops.install]
