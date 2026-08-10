@@ -49,6 +49,14 @@ output = { format = "lines" }
 pattern = "^(?P<name>\\S+)\\s*$"
 fields = { name = "name" }
 
+# Asked about one package, pacstall prints what it knows a name and a value
+# to a line. It is the only place a version appears, since neither listing
+# carries one.
+[ops.info]
+args = ["-Si", "{selector}"]
+output = { format = "keyvalue", separator = "=" }
+fields = { name = "pkgbase", version = "pkgver", description = "pkgdesc", repo = "gives" }
+
 # `-P` answers the prompts, which is the only way this runs unattended.
 # Elevation comes from the [system] table above rather than from here.
 [ops.install]
