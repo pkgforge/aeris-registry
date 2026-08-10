@@ -14,10 +14,10 @@ updated = "2026-08-10"
 [[plugins]]
 id = "am"
 name = "AppMan"
-version = "10.3.1"
+version = "10.3.2"
 description = "AppImages and portable programs from AM's database, installed per user"
 manifest_url = "https://raw.githubusercontent.com/pkgforge/aeris-registry/main/adapters/am.toml"
-manifest_checksum_sha256 = "67fd44d575667a14d98dd38fb0b364c48e650db160ee5ada6b5f4af1f954f75a"
+manifest_checksum_sha256 = "e2028a1af7176e281cd28732eb933b4f2abcdede9aae500376d6336893a022d3"
 repo_url = "https://github.com/ivan-hc/AM"
 
 [[plugins]]

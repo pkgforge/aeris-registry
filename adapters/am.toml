@@ -6,11 +6,16 @@
 schema_version = 1
 id = "am"
 name = "AppMan"
-version = "10.3.1"
+version = "10.3.2"
 description = "AppImages and portable programs from AM's database"
 
 # AM colours its output when a terminal is watching.
 strip_ansi = true
+
+# AM reports trouble in words and still exits as though all was well, so an
+# install of something it does not have would otherwise read as a success.
+# Every one of its errors carries this mark.
+failure_pattern = "\U0001F480"
 
 # AM ships one binary per scope: `appman` for the person running it and `am`
 # for everyone. `am` refuses to be run under sudo and elevates itself where
