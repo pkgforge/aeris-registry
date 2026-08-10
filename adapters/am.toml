@@ -6,7 +6,7 @@
 schema_version = 1
 id = "am"
 name = "AppMan"
-version = "10.3.2"
+version = "10.3.3"
 description = "AppImages and portable programs from AM's database"
 
 # AM colours its output when a terminal is watching.
@@ -50,12 +50,14 @@ fields = { name = "name", description = "description" }
 # a diamond on a terminal and as escape text anywhere else; matching it is not
 # worth it. The header and its rule are the only rows starting with `-`, which
 # is what separates them from a package here. A name carrying `**` is one AM
-# considers archived or stale, kept out of the name itself.
+# considers archived or stale, kept out of the name itself. A package from a
+# database other than the main one carries that database in a column of its
+# own, which is why the one before the version is optional.
 [ops.list_installed]
 args = ["-f"]
 output = { format = "lines" }
-pattern = "^\\s*[^-\\s]\\S*\\s+(?P<name>[^\\s*|]+)\\**\\s*\\|\\s*(?P<version>[^|]+?)\\s*\\|\\s*(?P<pkg_type>[^|]+?)\\s*\\|\\s*(?P<size>[^|]+?)\\s*$"
-fields = { name = "name", version = "version", pkg_type = "pkg_type", size = "size" }
+pattern = "^\\s*[^-\\s]\\S*\\s+(?P<name>[^\\s*|]+)\\**\\s*\\|(?:\\s*(?P<repo>[^|]+?)\\s*\\|)?\\s*(?P<version>[^|]+?)\\s*\\|\\s*(?P<pkg_type>[^|]+?)\\s*\\|\\s*(?P<size>[^|]+?)\\s*$"
+fields = { name = "name", version = "version", pkg_type = "pkg_type", size = "size", repo = "repo" }
 
 # AM has no machine-readable progress, so these report the stage they are at
 # and nothing finer.
