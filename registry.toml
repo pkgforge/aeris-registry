@@ -14,7 +14,7 @@
 # changes it.
 [registry]
 version = 1
-updated = "2026-08-15"
+updated = "2026-10-26"
 
 [[plugins]]
 id = "am"
@@ -24,6 +24,15 @@ description = "AppImages and portable programs from AM's database"
 manifest_url = "https://raw.githubusercontent.com/pkgforge/aeris-registry/main/adapters/am.toml"
 manifest_checksum_sha256 = "7cd2e8f03a9750ee428832820127eaa92efb2318aee021ca72edb002758f4160"
 repo_url = "https://github.com/ivan-hc/AM"
+
+[[plugins]]
+id = "flatpak"
+name = "Flatpak"
+version = "1"
+description = "Sandboxed desktop applications via Flatpak"
+manifest_url = "https://raw.githubusercontent.com/pkgforge/aeris-registry/main/adapters/flatpak.toml"
+manifest_checksum_sha256 = "82d05353a88c6ca9b3a7c5e95e80ab4057b53a4a22339d203dbec81dd6b1fe61"
+repo_url = "https://github.com/flatpak/flatpak"
 
 [[plugins]]
 id = "pacstall"

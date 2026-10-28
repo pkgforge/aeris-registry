@@ -1,0 +1,126 @@
+# Flatpak, driven as a command.
+#
+# Flatpak introduced JSON output for query commands in version 1.17.0
+# (flatpak#6337), so records are read with field maps rather than line
+# patterns.
+#
+# Verified against flatpak 1.18.4 on Linux. JSON key names were also checked
+# against the flatpak source (main, 1.19.2): each key is the lowercased column
+# title with spaces turned into underscores, which is where `application_id`
+# and `installed_size` come from.
+#
+# KNOWN LIMITATIONS. These cannot be fixed from a manifest alone, and each
+# needs a change in aeris itself. Details and suggested fixes are in
+# flatpak-notes.md.
+#
+#   1. Locale. Flatpak translates the column titles, and the JSON keys are
+#      built from the translated titles. Under a non-English locale the field
+#      maps below do not match and lists come back empty. Sizes written with a
+#      decimal comma are also misread. Aeris needs to run these operations
+#      with LC_ALL=C.
+#   2. Scope. A manifest has no way to pass `--user` for the user scope, so
+#      the user scope passes nothing and flatpak's default applies: list,
+#      search, update and uninstall span every installation, and
+#      `remote-add` goes to the system installation.
+#   3. Install with several remotes. `install` is given only the application
+#      ID. If more than one remote (or installation) carries that ID, flatpak
+#      refuses to choose in non-interactive mode and the install fails with
+#      an explicit message. Aeris does not pass the remote through.
+#   4. Updates. `remote-ls --updates` reports only the available version, so
+#      the UI shows the same version on both sides of an update. An app whose
+#      appstream data has no version shows an empty one.
+#   5. Empty results. `list` and `remote-ls` print nothing at all when there
+#      are no rows, so aeris logs "answered nothing". The UI treats that as an
+#      empty list, but the warning is noise.
+schema_version = 1
+id = "flatpak"
+name = "Flatpak"
+version = "1"
+description = "Sandboxed desktop applications via Flatpak"
+
+# Flatpak identifies applications by reverse-DNS ID, which is the only form
+# used. There is no qualified form to fall back from, because install and
+# update take the ID alone (see limitation 3).
+selector = ["{application_id}"]
+
+# Flatpak escalates itself through its Polkit system helper for system-wide
+# operations. Running under sudo or pkexec bypasses the helper and fails on
+# SELinux and permissions, so elevate is false for both scopes.
+#
+# Only the system scope gets a flag. See limitation 2 for what that means for
+# the user scope.
+[system]
+args = ["--system"]
+elevate = false
+
+[detect]
+command = "flatpak"
+version = ["--version"]
+min_version = "1.17"
+
+# Search covers both applications and runtimes because flatpak search does not
+# support --app. `remotes` can hold several names joined with commas.
+[ops.search]
+args = ["search", "-j", "{query}"]
+output = { format = "json" }
+fields = { name = "name", application_id = "application_id", description = "description", version = "version", repo = "remotes" }
+
+# Prints nothing when no application is installed (limitation 5).
+[ops.list_installed]
+args = ["list", "--columns=all", "--app", "-j"]
+output = { format = "json" }
+fields = { name = "name", application_id = "application_id", description = "description", version = "version", repo = "origin", size = "installed_size" }
+
+# remote-ls --updates reports only the available remote target version.
+# The currently installed version is not reported in this output stream,
+# so the UI shows the available target version (limitation 4). It prints
+# nothing when everything is up to date (limitation 5).
+[ops.list_updates]
+args = ["remote-ls", "--updates", "--app", "-j"]
+output = { format = "json" }
+fields = { name = "name", application_id = "application_id", version = "version", new_version = "version", repo = "origin" }
+
+# --noninteractive implies --assumeyes. It also makes flatpak fail rather than
+# ask when the ID matches more than one remote (limitation 3).
+[ops.install]
+args = ["install", "--noninteractive", "{selector}"]
+output = { format = "lines" }
+
+[ops.remove]
+args = ["uninstall", "--noninteractive", "{selector}"]
+output = { format = "lines" }
+
+[ops.update]
+args = ["update", "--noninteractive", "{selector}"]
+output = { format = "lines" }
+
+# Updates runtimes as well as applications, while list_updates names
+# applications only, so this can do more than the Updates view lists.
+[ops.update_all]
+args = ["update", "--noninteractive"]
+output = { format = "lines" }
+
+# `-d` is what makes flatpak print the URL and description columns. A remote
+# with no description reports "-". Disabled remotes are not listed, and
+# `enabled` is not mapped, so every listed remote reads as enabled.
+[ops.list_repos]
+args = ["remotes", "-d", "-j"]
+output = { format = "json" }
+fields = { name = "name", url = "url", description = "description" }
+
+# Takes a repository URL or a .flatpakrepo file, such as
+# https://dl.flathub.org/repo/flathub.flatpakrepo. Without --user this adds
+# the remote system wide (limitation 2).
+[ops.add_repo]
+args = ["remote-add", "--if-not-exists", "{name}", "{url}"]
+output = { format = "lines" }
+
+# No `--force`. With applications installed from the remote, flatpak asks
+# whether to remove them, and with no terminal that question is declined, so
+# the removal fails with "Can't remove remote ... with installed refs". That
+# is the safe outcome: `--force` would delete the remote and leave those
+# applications with no origin, unable to update. Removing a remote that
+# nothing was installed from works as expected.
+[ops.remove_repo]
+args = ["remote-delete", "{name}"]
+output = { format = "lines" }
